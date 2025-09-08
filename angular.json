@@ -13,6 +13,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "file-saver",
+              "sweetalert2",
+              "buffer",
+              "html2canvas"
+            ],
             "outputPath": "dist/rotation-planner",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -27,17 +34,22 @@
               }
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "node_modules/ngx-toastr/toastr.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "3mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -85,6 +97,7 @@
               }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -92,5 +105,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
