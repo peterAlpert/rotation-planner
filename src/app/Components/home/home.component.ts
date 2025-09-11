@@ -61,11 +61,13 @@ export class HomeComponent implements OnInit {
     controllers: Person[];
     image: string;
   }[] = [
-      { name: "شيفت صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg' },
+      { name: "صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg' },
+      { name: "بتوين", color: "#6610f2", supervisors: [], controllers: [], image: 'assets/1b.jpg' },
       { name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg' },
       { name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg' },
       { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
     ];
+
 
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
