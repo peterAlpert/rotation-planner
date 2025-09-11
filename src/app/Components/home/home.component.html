@@ -25,37 +25,85 @@
     <!-- العمود الشمال: المناطق -->
     <div class="col-9">
         <div class="row">
-            <div class="col-md-6 mb-4" *ngFor="let area of areas">
-                <div class="area-card p-3" [style.borderColor]="area.color" cdkDropList [id]="area.name + '-sup'"
-                    [cdkDropListData]="area.supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
-                    (cdkDropListDropped)="drop($event)" class="list" [class.drop-hover]="area.supervisors.length < 1">
-
-                    <!-- <div class="area-image" [style.background-image]="'url(' + area.image + ')'"></div> -->
-
-                    <h1 class="fw-bold text-center mb-3 text-light">{{area.name}}</h1>
-
-                    <!-- المشرف -->
-                    <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
-                        👨‍💼
-                        <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}</span>
-                        <span *ngIf="area.supervisors.length === 0">بدون مشرف</span>
-                    </h4>
-
-                    <!-- الكنترول -->
-                    <h6 class="text-light text-center mt-3">🎯 الكنترول ({{area.controllers.length}})</h6>
-                    <div cdkDropList [id]="area.name + '-ctrl'" [cdkDropListData]="area.controllers"
-                        [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
-                        class="list">
+            <ng-container *ngFor="let area of areas">
+                <!-- لو المنطقة شيفت صباحي -->
+                <!-- لو المنطقة شيفت صباحي -->
+                <div class="col-md-6 mb-4" *ngIf="area.name === 'شيفت صباحي'">
+                    <div class="area-card p-3" [style.borderColor]="area.color">
                         <div class="row">
-                            <div class="col-6 col-md-6 mb-2" *ngFor="let ctrl of area.controllers" cdkDrag>
-                                <div class="item controller text-center">{{ ctrl.name }}</div>
+                            <!-- صباحي -->
+                            <div class="col-6 p-1" cdkDropList [id]="area.name + '-right-sup'"
+                                [cdkDropListData]="area.subAreas[0].controllers"
+                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)">
+                                <h1 class="fw-bold text-center mb-2 text-light">{{ area.subAreas[0].name }}</h1>
+                                <h4 class="fw-bold text-center mb-2" [style.color]="area.color">
+                                    👨‍💼 <span *ngIf="area.supervisors.length">{{ area.supervisors[0].name }}</span>
+                                    <span *ngIf="!area.supervisors.length">بدون مشرف</span>
+                                </h4>
+                                <h6 class="text-light text-center mt-2">🎯 الكنترول ({{
+                                    area.subAreas[0].controllers.length }})</h6>
+                                <div class="list">
+                                    <div class="row">
+                                        <div class="col-6 mb-2" *ngFor="let ctrl of area.subAreas[0].controllers"
+                                            cdkDrag>
+                                            <div class="item controller text-center">{{ ctrl.name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- توين -->
+                            <div class="col-6 p-1" cdkDropList [id]="area.name + '-left-sup'"
+                                [cdkDropListData]="area.subAreas[1].controllers"
+                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)">
+                                <h1 class="fw-bold text-center mb-2 text-light">{{ area.subAreas[1].name }}</h1>
+                                <h4 class="fw-bold text-center mb-2" [style.color]="area.color">
+                                    👨‍💼 <span *ngIf="area.supervisors.length">{{ area.supervisors[0].name }}</span>
+                                    <span *ngIf="!area.supervisors.length">بدون مشرف</span>
+                                </h4>
+                                <h6 class="text-light text-center mt-2">🎯 الكنترول ({{
+                                    area.subAreas[1].controllers.length }})</h6>
+                                <div class="list">
+                                    <div class="row">
+                                        <div class="col-6 mb-2" *ngFor="let ctrl of area.subAreas[1].controllers"
+                                            cdkDrag>
+                                            <div class="item controller text-center">{{ ctrl.name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- باقي المناطق -->
+                <div class="col-md-6 mb-4" *ngIf="area.name !== 'شيفت صباحي'">
+                    <div class="area-card p-3" [style.borderColor]="area.color" cdkDropList [id]="area.name + '-sup'"
+                        [cdkDropListData]="area.supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
+                        (cdkDropListDropped)="drop($event)" class="list"
+                        [class.drop-hover]="area.supervisors.length < 1">
+                        <h1 class="fw-bold text-center mb-3 text-light">{{area.name}}</h1>
+                        <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
+                            👨‍💼
+                            <span *ngIf="area.supervisors.length" class="fs-1">{{ area.supervisors[0].name }}</span>
+                            <span *ngIf="area.supervisors.length === 0">بدون مشرف</span>
+                        </h4>
+                        <h6 class="text-light text-center mt-3">🎯 الكنترول ({{area.controllers.length}})</h6>
+                        <div cdkDropList [id]="area.name + '-ctrl'" [cdkDropListData]="area.controllers"
+                            [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
+                            class="list">
+                            <div class="row">
+                                <div class="col-6 col-md-6 mb-2" *ngFor="let ctrl of area.controllers" cdkDrag>
+                                    <div class="item controller text-center">{{ ctrl.name }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-
                 </div>
-            </div>
+            </ng-container>
         </div>
     </div>
 
@@ -63,9 +111,6 @@
         <button class="btn btn-success" (click)="saveDistribution()">💾 حفظ</button>
         <button class="btn btn-info" (click)="loadDistribution()">📂 تحميل</button>
         <button class="btn btn-warning" (click)="resetDistribution()">♻️ إعادة</button>
-        <!-- <button class="btn btn-primary" (click)="exportToPDF()">📥 تصدير PDF</button> -->
         <button class="btn btn-success" (click)="exportToWord()">📥 تصدير Word</button>
-
     </div>
-
 </div>

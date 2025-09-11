@@ -60,12 +60,30 @@ export class HomeComponent implements OnInit {
     supervisors: Person[];
     controllers: Person[];
     image: string;
+    subAreas: { name: string; controllers: Person[] }[]; // مش optional
   }[] = [
-      { name: "شيفت صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg' },
-      { name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg' },
-      { name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg' },
-      { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
+      {
+        name: "شيفت صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg',
+        subAreas: [
+          { name: "صباحي", controllers: [] },
+          { name: "توين", controllers: [] }
+        ]
+      },
+      {
+        name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg',
+        subAreas: []
+      },
+      {
+        name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg',
+        subAreas: []
+      },
+      {
+        name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg',
+        subAreas: []
+      }
     ];
+
+
 
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
