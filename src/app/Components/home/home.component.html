@@ -25,62 +25,12 @@
     <!-- العمود الشمال: المناطق -->
     <div class="col-9">
         <div class="row">
-            <!-- الصف الأول: صباحي + بتوين -->
-            <!-- الصف للجزء الصباحي مقسوم جزئين -->
-            <div class="col-md-6 mb-4">
-                <div class="area-card p-3" [style.borderColor]="'#6f42c1'" cdkDropList id="morning-shift-sup"
-                    [cdkDropListData]="areas[0].supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
-                    (cdkDropListDropped)="drop($event)">
-
-                    <h1 class="fw-bold text-center mb-3 text-light">شيفت صباحي</h1>
-
-                    <!-- المشرف (مشترك بين الجزئين) -->
-                    <h4 class="fw-bold text-center mb-3" style="color:#6f42c1">
-                        👨‍💼
-                        <span *ngIf="areas[0].supervisors.length > 0" class="fs-1">{{ areas[0].supervisors[0].name
-                            }}</span>
-                        <span *ngIf="areas[0].supervisors.length === 0">بدون مشرف</span>
-                    </h4>
-
-                    <!-- تقسيم داخلي إلى جزئين -->
-                    <div class="row">
-                        <!-- جزء صباحي -->
-                        <div class="col-6">
-                            <h5 class="text-center text-light">صباحي</h5>
-                            <div cdkDropList id="morning-sup" [cdkDropListData]="areas[0].controllersMorning"
-                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
-                                class="list">
-                                <div class="row">
-                                    <div class="col-12 mb-2" *ngFor="let ctrl of areas[0].controllersMorning" cdkDrag>
-                                        <div class="item controller text-center">{{ ctrl.name }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- جزء بتوين -->
-                        <div class="col-6">
-                            <h5 class="text-center text-light">بتوين</h5>
-                            <div cdkDropList id="between-sup" [cdkDropListData]="areas[0].controllersBetween"
-                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
-                                class="list">
-                                <div class="row">
-                                    <div class="col-12 mb-2" *ngFor="let ctrl of areas[0].controllersBetween" cdkDrag>
-                                        <div class="item controller text-center">{{ ctrl.name }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- باقي المناطق -->
-            <div class="col-md-6 mb-4" *ngFor="let area of areas | slice:2">
+            <div class="col-md-6 mb-4" *ngFor="let area of areas">
                 <div class="area-card p-3" [style.borderColor]="area.color" cdkDropList [id]="area.name + '-sup'"
                     [cdkDropListData]="area.supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
                     (cdkDropListDropped)="drop($event)" class="list" [class.drop-hover]="area.supervisors.length < 1">
+
+                    <!-- <div class="area-image" [style.background-image]="'url(' + area.image + ')'"></div> -->
 
                     <h1 class="fw-bold text-center mb-3 text-light">{{area.name}}</h1>
 
@@ -103,17 +53,19 @@
                         </div>
                     </div>
 
+
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- أزرار ثابتة -->
     <div class="fixed-buttons text-center">
         <button class="btn btn-success" (click)="saveDistribution()">💾 حفظ</button>
         <button class="btn btn-info" (click)="loadDistribution()">📂 تحميل</button>
         <button class="btn btn-warning" (click)="resetDistribution()">♻️ إعادة</button>
+        <!-- <button class="btn btn-primary" (click)="exportToPDF()">📥 تصدير PDF</button> -->
         <button class="btn btn-success" (click)="exportToWord()">📥 تصدير Word</button>
+
     </div>
+
 </div>
