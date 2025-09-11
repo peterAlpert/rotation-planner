@@ -60,30 +60,12 @@ export class HomeComponent implements OnInit {
     supervisors: Person[];
     controllers: Person[];
     image: string;
-    subAreas: { name: string; controllers: Person[] }[]; // مش optional
   }[] = [
-      {
-        name: "شيفت صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg',
-        subAreas: [
-          { name: "صباحي", controllers: [] },
-          { name: "توين", controllers: [] }
-        ]
-      },
-      {
-        name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg',
-        subAreas: []
-      },
-      {
-        name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg',
-        subAreas: []
-      },
-      {
-        name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg',
-        subAreas: []
-      }
+      { name: "شيفت صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg' },
+      { name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg' },
+      { name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg' },
+      { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
     ];
-
-
 
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
@@ -97,37 +79,45 @@ export class HomeComponent implements OnInit {
   drop(event: CdkDragDrop<Person[]>) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
-    // لو الكنترول
-    if (draggedItem.role === 'كنترول') {
-      if (event.container.data) {
-        transferArrayItem(
-          event.previousContainer.data,
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex
-        );
-      } else {
-        // رجعه لمكانه
-        event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
-      }
+    // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
+    if (!event.container.data || !event.container.id) {
+      // نرجعه مكانه
+      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
+      return;
     }
 
-    // لو المشرف
-    if (draggedItem.role === 'مشرف') {
-      const area = this.areas.find(a => event.container.id.includes(a.name));
-      if (area && area.supervisors.length === 0) {
-        // ضيف المشرف للمنطقة
-        area.supervisors.push(draggedItem);
-        // شيل من القائمه الرئيسية
-        this.supervisors = this.supervisors.filter(s => s.id !== draggedItem.id);
-      } else {
-        // إعادة المشرف لمكانه الأصلي
-        event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
-        this.toastr.warning('لا يمكن وضع أكثر من مشرف في هذه المنطقة', '⚠️ تحذير');
+    // منع إضافة أكثر من مشرف لكل منطقة
+    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+      return;
+    }
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+      // إزالة من باقي المناطق لو مشرف/كنترول
+      if (draggedItem.role === 'مشرف') {
+        this.areas.forEach(area => {
+          if (area.supervisors !== event.container.data) {
+            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
+          }
+        });
+      }
+      if (draggedItem.role === 'كنترول') {
+        this.areas.forEach(area => {
+          if (area.controllers !== event.container.data) {
+            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
+          }
+        });
       }
     }
   }
-
 
 
 
