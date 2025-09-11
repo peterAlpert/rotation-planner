@@ -26,34 +26,55 @@
     <div class="col-9">
         <div class="row">
             <!-- الصف الأول: صباحي + بتوين -->
-            <div class="col-md-6 mb-4" *ngFor="let area of areas | slice:0:2">
-                <div class="area-card p-3" [style.borderColor]="area.color" cdkDropList [id]="area.name + '-sup'"
-                    [cdkDropListData]="area.supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
-                    (cdkDropListDropped)="drop($event)" class="list" [class.drop-hover]="area.supervisors.length < 1">
+            <!-- الصف للجزء الصباحي مقسوم جزئين -->
+            <div class="col-md-6 mb-4">
+                <div class="area-card p-3" [style.borderColor]="'#6f42c1'" cdkDropList id="morning-shift-sup"
+                    [cdkDropListData]="areas[0].supervisors" [cdkDropListConnectedTo]="connectedSupervisorLists"
+                    (cdkDropListDropped)="drop($event)">
 
-                    <h1 class="fw-bold text-center mb-3 text-light">{{area.name}}</h1>
+                    <h1 class="fw-bold text-center mb-3 text-light">شيفت صباحي</h1>
 
-                    <!-- المشرف -->
-                    <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
+                    <!-- المشرف (مشترك بين الجزئين) -->
+                    <h4 class="fw-bold text-center mb-3" style="color:#6f42c1">
                         👨‍💼
-                        <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}</span>
-                        <span *ngIf="area.supervisors.length === 0">بدون مشرف</span>
+                        <span *ngIf="areas[0].supervisors.length > 0" class="fs-1">{{ areas[0].supervisors[0].name
+                            }}</span>
+                        <span *ngIf="areas[0].supervisors.length === 0">بدون مشرف</span>
                     </h4>
 
-                    <!-- الكنترول -->
-                    <h6 class="text-light text-center mt-3">🎯 الكنترول ({{area.controllers.length}})</h6>
-                    <div cdkDropList [id]="area.name + '-ctrl'" [cdkDropListData]="area.controllers"
-                        [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
-                        class="list">
-                        <div class="row">
-                            <div class="col-6 col-md-6 mb-2" *ngFor="let ctrl of area.controllers" cdkDrag>
-                                <div class="item controller text-center">{{ ctrl.name }}</div>
+                    <!-- تقسيم داخلي إلى جزئين -->
+                    <div class="row">
+                        <!-- جزء صباحي -->
+                        <div class="col-6">
+                            <h5 class="text-center text-light">صباحي</h5>
+                            <div cdkDropList id="morning-sup" [cdkDropListData]="areas[0].controllersMorning"
+                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
+                                class="list">
+                                <div class="row">
+                                    <div class="col-12 mb-2" *ngFor="let ctrl of areas[0].controllersMorning" cdkDrag>
+                                        <div class="item controller text-center">{{ ctrl.name }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- جزء بتوين -->
+                        <div class="col-6">
+                            <h5 class="text-center text-light">بتوين</h5>
+                            <div cdkDropList id="between-sup" [cdkDropListData]="areas[0].controllersBetween"
+                                [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
+                                class="list">
+                                <div class="row">
+                                    <div class="col-12 mb-2" *ngFor="let ctrl of areas[0].controllersBetween" cdkDrag>
+                                        <div class="item controller text-center">{{ ctrl.name }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
+
 
             <!-- باقي المناطق -->
             <div class="col-md-6 mb-4" *ngFor="let area of areas | slice:2">

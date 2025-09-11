@@ -59,46 +59,69 @@ export class HomeComponent implements OnInit {
     color: string;
     supervisors: Person[];
     controllers: Person[];
+    controllersMorning: Person[];
+    controllersBetween: Person[];
     image: string;
   }[] = [
-      { name: "صباحي", color: "#6f42c1", supervisors: [], controllers: [], image: 'assets/1.jpg' },
-      { name: "بتوين", color: "#6610f2", supervisors: [], controllers: [], image: 'assets/1b.jpg' },
-      { name: "الملاعب", color: "#198754", supervisors: [], controllers: [], image: 'assets/2.jpg' },
-      { name: "الجاردن", color: "#dc3545", supervisors: [], controllers: [], image: 'assets/2.jpg' },
-      { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
+      {
+        name: "صباحي",
+        color: "#6f42c1",
+        supervisors: [],
+        controllers: [],
+        controllersMorning: [],   // 👈 موجودة
+        controllersBetween: [],   // 👈 موجودة
+        image: 'assets/1.jpg'
+      },
+      {
+        name: "الملاعب",
+        color: "#198754",
+        supervisors: [],
+        controllers: [],
+        controllersMorning: [],   // optional لو حابب
+        controllersBetween: [],
+        image: 'assets/2.jpg'
+      },
+      // باقي المناطق...
     ];
+
 
 
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
 
+
   ngOnInit() {
     this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
-    this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
+
+    // إضافة الـ drop lists للصباحي
+    this.connectedControllerLists = [
+      'controllers',
+      'controllersMorning',
+      'controllersBetween',
+      ...this.areas.slice(1).map(a => a.name + '-ctrl')
+    ];
   }
+
 
 
   drop(event: CdkDragDrop<Person[]>) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
-    // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
-    if (!event.container.data || !event.container.id) {
-      // نرجعه مكانه
-      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
-      return;
-    }
+    if (!event.container.data) return;
 
-    // منع إضافة أكثر من مشرف لكل منطقة
-    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+    // مثال لمنع undefined
+    const containerData = event.container.data!; // نأكد للـ TS إنها array
+
+    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && containerData.length >= 1) {
       return;
     }
 
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      moveItemInArray(containerData, event.previousIndex, event.currentIndex);
     } else {
       transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
+        event.previousContainer.data!,
+        containerData,
         event.previousIndex,
         event.currentIndex
       );
@@ -106,20 +129,28 @@ export class HomeComponent implements OnInit {
       // إزالة من باقي المناطق لو مشرف/كنترول
       if (draggedItem.role === 'مشرف') {
         this.areas.forEach(area => {
-          if (area.supervisors !== event.container.data) {
-            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
+          if (area.supervisors !== containerData) {
+            area.supervisors = area.supervisors.filter(s => s.id !== draggedItem.id);
           }
         });
       }
+
       if (draggedItem.role === 'كنترول') {
         this.areas.forEach(area => {
-          if (area.controllers !== event.container.data) {
-            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
+          if (area.controllers !== containerData) {
+            area.controllers = area.controllers.filter(c => c.id !== draggedItem.id);
+          }
+          if ((area.controllersMorning || []) !== containerData) {
+            area.controllersMorning = (area.controllersMorning || []).filter(c => c.id !== draggedItem.id);
+          }
+          if ((area.controllersBetween || []) !== containerData) {
+            area.controllersBetween = (area.controllersBetween || []).filter(c => c.id !== draggedItem.id);
           }
         });
       }
     }
   }
+
 
 
 
@@ -142,7 +173,7 @@ export class HomeComponent implements OnInit {
     const data = this.areas.map(area => [
       area.name,
       area.supervisors.length ? area.supervisors[0].name : 'بدون مشرف',
-      area.controllers.map(c => c.name).join(', ')
+      (area.controllers || []).map(c => c.name).join(', ')
     ]);
 
     autoTable(doc, {
@@ -261,7 +292,7 @@ export class HomeComponent implements OnInit {
   // دالة تشيل اللي متوزعين من القوائم
   removeAssignedFromLists() {
     const assignedSupervisors = this.areas.flatMap(a => a.supervisors.map(s => s.id));
-    const assignedControllers = this.areas.flatMap(a => a.controllers.map(c => c.id));
+    const assignedControllers = this.areas.flatMap(a => (a.controllers || []).map(c => c.id));
 
     this.supervisors = this.supervisors.filter(s => !assignedSupervisors.includes(s.id));
     this.controllers = this.controllers.filter(c => !assignedControllers.includes(c.id));
@@ -292,8 +323,8 @@ export class HomeComponent implements OnInit {
       );
 
       // صفوف الكنترول
-      if (item.controllers.length) {
-        item.controllers.forEach(ctrl => {
+      if ((item.controllers || []).length) {
+        (item.controllers || []).forEach(ctrl => {
           rows.push(
             new TableRow({
               children: [
