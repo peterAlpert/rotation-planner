@@ -97,43 +97,33 @@ export class HomeComponent implements OnInit {
   drop(event: CdkDragDrop<Person[]>) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
-    // منع إسقاط مشرف في منطقة بها مشرف بالفعل
-    if (draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
-      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem); // رجعه لمكانه
-      this.toastr.warning('لا يمكن وضع أكثر من مشرف واحد', '⚠️ تحذير');
-      return;
-    }
-
-    // لو الكنترول موجود في مكانه بالفعل أو غير متوافق
-    if (!event.container.data || !event.container.id) {
-      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
-      return;
-    }
-
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-
-      // إزالة من باقي المناطق
-      if (draggedItem.role === 'مشرف') {
-        this.areas.forEach(area => {
-          if (area.supervisors !== event.container.data) {
-            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
-          }
-        });
+    // لو الكنترول
+    if (draggedItem.role === 'كنترول') {
+      if (event.container.data) {
+        transferArrayItem(
+          event.previousContainer.data,
+          event.container.data,
+          event.previousIndex,
+          event.currentIndex
+        );
+      } else {
+        // رجعه لمكانه
+        event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
       }
-      if (draggedItem.role === 'كنترول') {
-        this.areas.forEach(area => {
-          if (area.controllers !== event.container.data) {
-            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
-          }
-        });
+    }
+
+    // لو المشرف
+    if (draggedItem.role === 'مشرف') {
+      const area = this.areas.find(a => event.container.id.includes(a.name));
+      if (area && area.supervisors.length === 0) {
+        // ضيف المشرف للمنطقة
+        area.supervisors.push(draggedItem);
+        // شيل من القائمه الرئيسية
+        this.supervisors = this.supervisors.filter(s => s.id !== draggedItem.id);
+      } else {
+        // إعادة المشرف لمكانه الأصلي
+        event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
+        this.toastr.warning('لا يمكن وضع أكثر من مشرف في هذه المنطقة', '⚠️ تحذير');
       }
     }
   }
