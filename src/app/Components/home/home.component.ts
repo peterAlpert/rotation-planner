@@ -97,15 +97,16 @@ export class HomeComponent implements OnInit {
   drop(event: CdkDragDrop<Person[]>) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
-    // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
-    if (!event.container.data || !event.container.id) {
-      // نرجعه مكانه
-      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
+    // منع إسقاط مشرف في منطقة بها مشرف بالفعل
+    if (draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem); // رجعه لمكانه
+      this.toastr.warning('لا يمكن وضع أكثر من مشرف واحد', '⚠️ تحذير');
       return;
     }
 
-    // منع إضافة أكثر من مشرف لكل منطقة
-    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+    // لو الكنترول موجود في مكانه بالفعل أو غير متوافق
+    if (!event.container.data || !event.container.id) {
+      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
       return;
     }
 
@@ -119,7 +120,7 @@ export class HomeComponent implements OnInit {
         event.currentIndex
       );
 
-      // إزالة من باقي المناطق لو مشرف/كنترول
+      // إزالة من باقي المناطق
       if (draggedItem.role === 'مشرف') {
         this.areas.forEach(area => {
           if (area.supervisors !== event.container.data) {
@@ -136,6 +137,7 @@ export class HomeComponent implements OnInit {
       }
     }
   }
+
 
 
 
