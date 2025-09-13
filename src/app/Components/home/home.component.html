@@ -26,7 +26,7 @@
     <div class="col-9">
         <div class="row">
             <div class="col-md-6 mb-4" *ngFor="let area of areas">
-                <div class="area-card p-3" [style.borderColor]="area.color">
+                <div class="area-card p-3 h-100 d-flex flex-column" [style.borderColor]="area.color">
                     <h1 class="fw-bold text-center mb-3 text-light">{{ area.name }}</h1>
 
                     <!-- لو المنطقة شيفت صباحي -->
@@ -37,7 +37,10 @@
                             <span *ngIf="area.supervisors.length > 0" class="fs-1">
                                 {{ area.supervisors[0].name }}
                             </span>
-                            <span *ngIf="area.supervisors.length === 0">بدون مشرف</span>
+                            <!-- مربع فارغ بيظهر لو مفيش مشرف -->
+                            <div *ngIf="area.supervisors.length === 0" class="empty-box">
+                                اسحب مشرف هنا
+                            </div>
                         </h4>
                         <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                             [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
@@ -62,7 +65,7 @@
 
                                 <!-- Betwen -->
                                 <div class="col-6">
-                                    <h6 class="text-center text-info">Betwen</h6>
+                                    <h6 class="text-center text-info">بيتوين</h6>
                                     <div cdkDropList [id]="shift.name + '-between'" [cdkDropListData]="shift.between"
                                         [cdkDropListConnectedTo]="connectedControllerLists"
                                         (cdkDropListDropped)="drop($event)" class="list">
@@ -82,7 +85,10 @@
                         <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
                             👨‍💼
                             <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}</span>
-                            <span *ngIf="area.supervisors.length === 0">بدون مشرف</span>
+                            <!-- مربع فارغ بيظهر لو مفيش مشرف -->
+                            <div *ngIf="area.supervisors.length === 0" class="empty-box">
+                                اسحب مشرف هنا
+                            </div>
                         </h4>
                         <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                             [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
@@ -92,8 +98,9 @@
                         <h6 class="text-light text-center mt-3">🎯 الكنترول ({{ area.controllers.length }})</h6>
                         <div cdkDropList [id]="area.name + '-ctrl'" [cdkDropListData]="area.controllers"
                             [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
-                            class="list">
-                            <div *ngFor="let ctrl of area.controllers" cdkDrag class="item controller text-center">
+                            class="list controllers-box">
+                            <div *ngFor="let ctrl of area.controllers" cdkDrag
+                                class="item controller text-center person controller">
                                 {{ ctrl.name }}
                             </div>
                         </div>

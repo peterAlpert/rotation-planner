@@ -6,6 +6,7 @@
     border-radius: 10px;
 }
 
+/* العناصر (مشرف / كنترول) */
 .item {
     background: linear-gradient(135deg, #444, #222);
     color: #fff;
@@ -16,6 +17,7 @@
     cursor: grab;
     font-weight: bold;
     transition: transform 0.2s, box-shadow 0.3s;
+    animation: fadeInUp 0.4s ease;
 }
 
 .item:hover {
@@ -34,12 +36,21 @@
     color: #000;
 }
 
+/* كروت المناطق */
 .area-card {
-    background: #111;
-    border: 2px solid;
+    position: relative;
+    flex: 1;
+    border: 3px solid;
     border-radius: 15px;
+    background: #1e1e2f;
+    /* Dark mode */
+    color: #fff;
+    min-height: 200px;
+    padding-top: 40px;
+    /* عشان المسافة تحت الصورة */
 }
 
+/* عنوان المنطقة */
 .area-title {
     font-weight: bold;
     font-size: 20px;
@@ -47,6 +58,90 @@
     text-align: center;
 }
 
+/* صورة المنطقة */
+.area-image {
+    width: 80px;
+    height: 50px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 5px;
+    border: 2px solid #fff;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* زرار ثابت */
+.fixed-buttons {
+    position: fixed;
+    bottom: 10px;
+    left: 15%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 1000;
+}
+
+.fixed-buttons .btn {
+    opacity: 0.7;
+    transition: opacity 0.3s ease-out;
+}
+
+.fixed-buttons .btn:hover {
+    opacity: 1;
+}
+
+/* البوكسات */
+.shift-box {
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 10px;
+    background: #222;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-md-6 {
+    display: flex;
+}
+
+.empty-box {
+    border: 2px dashed #888;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    color: #aaa;
+    background-color: #2a2a3d;
+}
+
+/* الكنترول جنب بعض */
+.controllers-box {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* عمودين */
+    gap: 10px;
+    padding: 10px;
+    border: 2px dashed #666;
+    border-radius: 10px;
+    background: #1e1e2f;
+    min-height: 80px;
+}
+
+.person.controller {
+    background: #2d2d44;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Drag & Drop Animations */
 .cdk-drag-preview {
     transform: rotate(5deg) scale(1.1);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
@@ -64,6 +159,7 @@
     transition: background 0.3s, border 0.3s;
 }
 
+/* Animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -74,64 +170,4 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.item {
-    animation: fadeInUp 0.4s ease;
-}
-
-.area-image {
-    width: 80px;
-    /* طول المستطيل */
-    height: 50px;
-    /* ارتفاع المستطيل */
-    background-size: cover;
-    background-position: center;
-    border-radius: 5px;
-    border: 2px solid #fff;
-    /* حسب رغبتك */
-    position: absolute;
-    top: 50px;
-    left: 50px;
-    /* على الشمال */
-    z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* تعديل الكارد ليكون position relative */
-.area-card {
-    position: relative;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 10px;
-    min-height: 200px;
-    padding-top: 40px;
-    /* عشان المسافة تحت الصورة */
-}
-
-.fixed-buttons {
-    position: fixed;
-    bottom: 10px;
-    left: 15%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 1000;
-    /* عشان يبقوا فوق أي عناصر */
-}
-
-.fixed-buttons .btn {
-    opacity: 0.7;
-    transition: opacity 0.3s ease-out;
-}
-
-.fixed-buttons .btn:hover {
-    opacity: 1;
-}
-
-.shift-box {
-    border: 2px solid #999;
-    border-radius: 8px;
-    padding: 10px;
-    background: #222;
 }

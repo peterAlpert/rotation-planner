@@ -118,7 +118,6 @@ export class HomeComponent implements OnInit {
 
     // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
     if (!event.container.data || !event.container.id) {
-      // نرجعه مكانه
       event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
       return;
     }
@@ -131,73 +130,85 @@ export class HomeComponent implements OnInit {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
+      // 🟢 لو العنصر كنترول وجاي من "شيفت صباحي" → انسخ بدل النقل
+      if (
+        draggedItem.role === 'كنترول' &&
+        event.previousContainer.id.includes('sabahy')
+      ) {
+        if (!event.container.data.some(c => c.id === draggedItem.id)) {
+          event.container.data.push({ ...draggedItem });
+        }
+      } else {
+        // غير كده (مشرف أو كنترول من مناطق تانية) → قص ولصق
+        transferArrayItem(
+          event.previousContainer.data,
+          event.container.data,
+          event.previousIndex,
+          event.currentIndex
+        );
 
-      // إزالة من باقي المناطق لو مشرف/كنترول
-      if (draggedItem.role === 'مشرف') {
-        this.areas.forEach(area => {
-          if (area.supervisors !== event.container.data) {
-            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
-          }
-        });
-      }
-      if (draggedItem.role === 'كنترول') {
-        this.areas.forEach(area => {
-          if (area.controllers !== event.container.data) {
-            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
-          }
-        });
+        // 🔴 تأكد إن المشرف/الكنترول مش مكرر في باقي المناطق
+        if (draggedItem.role === 'مشرف') {
+          this.areas.forEach(area => {
+            if (area.supervisors !== event.container.data) {
+              area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
+            }
+          });
+        }
+        if (draggedItem.role === 'كنترول' && !event.previousContainer.id.includes('sabahy')) {
+          this.areas.forEach(area => {
+            if (area.controllers !== event.container.data) {
+              area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
+            }
+          });
+        }
       }
     }
   }
 
 
 
-  exportToPDF() {
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4"
-    });
+  // exportToPDF() {
+  //   const doc = new jsPDF({
+  //     orientation: "portrait",
+  //     unit: "pt",
+  //     format: "a4"
+  //   });
 
-    // تحميل الخط
-    doc.addFileToVFS("Cairo-Regular.ttf", cairoFont);
-    doc.addFont("Cairo-Regular.ttf", "Cairo", "normal");
-    doc.setFont("Cairo");
+  //   // تحميل الخط
+  //   doc.addFileToVFS("Cairo-Regular.ttf", cairoFont);
+  //   doc.addFont("Cairo-Regular.ttf", "Cairo", "normal");
+  //   doc.setFont("Cairo");
 
-    // نص تجريبي RTL
-    doc.text("تجربة تصدير PDF بخط Cairo", 400, 40, { align: "right" });
+  //   // نص تجريبي RTL
+  //   doc.text("تجربة تصدير PDF بخط Cairo", 400, 40, { align: "right" });
 
-    // تجهيز البيانات
-    const data = this.areas.map(area => [
-      area.name,
-      area.supervisors.length ? area.supervisors[0].name : 'بدون مشرف',
-      area.controllers.map(c => c.name).join(', ')
-    ]);
+  //   // تجهيز البيانات
+  //   const data = this.areas.map(area => [
+  //     area.name,
+  //     area.supervisors.length ? area.supervisors[0].name : 'بدون مشرف',
+  //     area.controllers.map(c => c.name).join(', ')
+  //   ]);
 
-    autoTable(doc, {
-      head: [['المنطقة', 'المشرف', 'الكنترولات']],
-      body: data,
-      theme: 'grid',
-      headStyles: { fillColor: [255, 193, 7] },
-      styles: { font: "Cairo", fontSize: 12, halign: "right" }, // مهم
-      columnStyles: {
-        0: { halign: 'right' },
-        1: { halign: 'right' },
-        2: { halign: 'right' }
-      }
-    });
+  //   autoTable(doc, {
+  //     head: [['المنطقة', 'المشرف', 'الكنترولات']],
+  //     body: data,
+  //     theme: 'grid',
+  //     headStyles: { fillColor: [255, 193, 7] },
+  //     styles: { font: "Cairo", fontSize: 12, halign: "right" }, // مهم
+  //     columnStyles: {
+  //       0: { halign: 'right' },
+  //       1: { halign: 'right' },
+  //       2: { halign: 'right' }
+  //     }
+  //   });
 
-    doc.save('توزيع_المشرفين_والكنترول.pdf');
-  }
+  //   doc.save('توزيع_المشرفين_والكنترول.pdf');
+  // }
 
 
   // حفظ التوزيع في Local Storage
+
   saveDistribution() {
     localStorage.setItem('areasDistribution', JSON.stringify(this.areas));
     this.toastr.success('تم حفظ التوزيع بنجاح!', '💾 حفظ');
