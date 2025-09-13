@@ -1,5 +1,5 @@
-import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { TableRow, TableCell, Paragraph, AlignmentType, Document, TextRun, WidthType, BorderStyle, Packer, Table } from 'docx';
 import saveAs from 'file-saver';
 import jsPDF from 'jspdf';
@@ -9,7 +9,16 @@ import Swal from 'sweetalert2';
 import { cairoFont } from '../../../../public/assets/cairo';
 import { Person } from '../../person';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+
+interface ShiftPeriod {
+  supervisors: Person[];
+  controllers: Person[];
+}
+interface Shift {
+  sobhi: ShiftPeriod;
+  between: ShiftPeriod;
+}
 
 @Component({
   selector: 'app-home',
@@ -20,6 +29,8 @@ import { RouterLink } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
   constructor(private toastr: ToastrService) { }
+
+  // القوائم الأساسية (نوع Person[])
   supervisors: Person[] = [
     { id: 1, name: "حسام حسن", role: "مشرف" },
     { id: 2, name: "شيرين اكرام", role: "مشرف" },
@@ -54,6 +65,7 @@ export class HomeComponent implements OnInit {
     { id: 28, name: "مريان اميل", role: "كنترول" }
   ];
 
+  // (لازلت محتفظ بمصفوفة الareas لأن فيها تصدير/تحميل/إكسل في كودك القديم)
   areas: {
     name: string;
     color: string;
@@ -67,60 +79,96 @@ export class HomeComponent implements OnInit {
       { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
     ];
 
+  // الهيكل الجديد للشيفتات — كل مصفوفة واضحة النوع Person[]
+  shifts: { shift1: Shift; shift2: Shift } = {
+    shift1: {
+      sobhi: { supervisors: [], controllers: [] },
+      between: { supervisors: [], controllers: [] }
+    },
+    shift2: {
+      sobhi: { supervisors: [], controllers: [] },
+      between: { supervisors: [], controllers: [] }
+    }
+  };
+
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
 
   ngOnInit() {
-    this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
-    this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
+    this.connectedSupervisorLists = [
+      'supervisors',
+      'shift1-sobhi-sup', 'shift1-between-sup',
+      'shift2-sobhi-sup', 'shift2-between-sup'
+    ];
+    this.connectedControllerLists = [
+      'controllers',
+      'shift1-sobhi-ctrl', 'shift1-between-ctrl',
+      'shift2-sobhi-ctrl', 'shift2-between-ctrl'
+    ];
   }
 
-
+  // مُعامل الـ drop مضبوط على Person[]
   drop(event: CdkDragDrop<Person[]>) {
-    const draggedItem = event.previousContainer.data[event.previousIndex];
+    // تأكيد النوع: item من نوع Person
+    const draggedItem: Person = event.previousContainer.data[event.previousIndex];
 
-    // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
-    if (!event.container.data || !event.container.id) {
-      // نرجعه مكانه
-      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
+    // حماية: لو مفيش data
+    if (!event.container || !event.container.data) return;
+
+    // منع أكثر من مشرف داخل أي صندوق مشرف (id يحتوي 'sup')
+    if (event.container.id.includes('sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+      // ممكن تضيف toastr لو حابب تخبر المستخدم
+      this.toastr.warning('لا يمكن إضافة أكثر من مشرف.', 'تنبيه');
       return;
     }
 
-    // منع إضافة أكثر من مشرف لكل منطقة
-    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
-      return;
-    }
-
+    // لو نفس القائمة — ترتيب داخلي
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-
-      // إزالة من باقي المناطق لو مشرف/كنترول
-      if (draggedItem.role === 'مشرف') {
-        this.areas.forEach(area => {
-          if (area.supervisors !== event.container.data) {
-            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
-          }
-        });
-      }
-      if (draggedItem.role === 'كنترول') {
-        this.areas.forEach(area => {
-          if (area.controllers !== event.container.data) {
-            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
-          }
-        });
-      }
+      return;
     }
+
+    // نقل العنصر بين القوائم
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    // بعد النقل: شيل العنصر من كل الأماكن التانية عشان مايتكررش
+    this.removePersonFromEverywhere(draggedItem);
   }
 
+  // يزيل الشخص المنقول من باقي القوائم (شيفتات، مناطق، القوائم الأساسية إذا لزم)
+  private removePersonFromEverywhere(p: Person) {
+    // من الشيفتات
+    Object.keys(this.shifts).forEach(shiftKey => {
+      const shift = (this.shifts as any)[shiftKey] as Shift;
+      // لكل فترة (sobhi / between)
+      (['sobhi', 'between'] as Array<keyof Shift>).forEach(periodKey => {
+        const period = shift[periodKey];
+        period.supervisors = period.supervisors.filter(s => s.id !== p.id);
+        period.controllers = period.controllers.filter(c => c.id !== p.id);
+      });
+    });
 
+    // من المناطق (areas) — لو مستخدم في أماكن تانية
+    this.areas.forEach(area => {
+      area.supervisors = area.supervisors.filter(s => s.id !== p.id);
+      area.controllers = area.controllers.filter(c => c.id !== p.id);
+    });
 
+    // من القوائم الأساسية (لو تم نقله هناك، نتركه فقط في المكان الحالي)
+    // Reset القوائم الأساسية لتضمن عدم تكرار: نشيل الشخص لو موجود
+    this.supervisors = this.supervisors.filter(s => s.id !== p.id);
+    this.controllers = this.controllers.filter(c => c.id !== p.id);
+
+    // بعد الحذف اعادة وضع العنصر في القوائم الأساسية غير مطلوبة هنا
+    // لأن النقل تم transferArrayItem سابقاً — العنصر موجود في القائمة الهدف بالفعل
+  }
+
+  // ---------- باقي الدوال القديمة (export / save / load) بدون تغيير جوهري ----------
   exportToPDF() {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -133,10 +181,8 @@ export class HomeComponent implements OnInit {
     doc.addFont("Cairo-Regular.ttf", "Cairo", "normal");
     doc.setFont("Cairo");
 
-    // نص تجريبي RTL
     doc.text("تجربة تصدير PDF بخط Cairo", 400, 40, { align: "right" });
 
-    // تجهيز البيانات
     const data = this.areas.map(area => [
       area.name,
       area.supervisors.length ? area.supervisors[0].name : 'بدون مشرف',
@@ -148,7 +194,7 @@ export class HomeComponent implements OnInit {
       body: data,
       theme: 'grid',
       headStyles: { fillColor: [255, 193, 7] },
-      styles: { font: "Cairo", fontSize: 12, halign: "right" }, // مهم
+      styles: { font: "Cairo", fontSize: 12, halign: "right" },
       columnStyles: {
         0: { halign: 'right' },
         1: { halign: 'right' },
@@ -159,28 +205,19 @@ export class HomeComponent implements OnInit {
     doc.save('توزيع_المشرفين_والكنترول.pdf');
   }
 
-
-  // حفظ التوزيع في Local Storage
   saveDistribution() {
     localStorage.setItem('areasDistribution', JSON.stringify(this.areas));
     this.toastr.success('تم حفظ التوزيع بنجاح!', '💾 حفظ');
   }
 
-  // تحميل التوزيع من Local Storage
   loadDistribution() {
     const saved = localStorage.getItem('areasDistribution');
     if (saved) {
       this.areas = JSON.parse(saved);
-
-      // رجع القوائم الأصلية
       this.resetLists();
-
-      // شيل أي مشرف/كنترول متوزع من القوائم الأصلية
       this.removeAssignedFromLists();
-
       this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
       this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
-
       this.toastr.info('تم تحميل التوزيع بنجاح!', '📂 تحميل');
     } else {
       this.toastr.warning('لا يوجد توزيع محفوظ.', '⚠️ تحذير');
@@ -199,27 +236,19 @@ export class HomeComponent implements OnInit {
       cancelButtonText: 'إلغاء'
     }).then((result) => {
       if (result.isConfirmed) {
-        // رجع القوائم الأصلية
         this.resetLists();
-
-        // فضي المناطق
         this.areas.forEach(area => {
           area.supervisors = [];
           area.controllers = [];
         });
-
         this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
         this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
-
         localStorage.removeItem('areasDistribution');
-
         this.toastr.error('تم إعادة التوزيع بالكامل!', '♻️ إعادة');
       }
     });
   }
 
-
-  // دالة تساعدك ترجّع القوائم الأصلية
   resetLists() {
     this.supervisors = [
       { id: 1, name: "حسام حسن", role: "مشرف" },
@@ -256,7 +285,6 @@ export class HomeComponent implements OnInit {
     ];
   }
 
-  // دالة تشيل اللي متوزعين من القوائم
   removeAssignedFromLists() {
     const assignedSupervisors = this.areas.flatMap(a => a.supervisors.map(s => s.id));
     const assignedControllers = this.areas.flatMap(a => a.controllers.map(c => c.id));
@@ -265,21 +293,17 @@ export class HomeComponent implements OnInit {
     this.controllers = this.controllers.filter(c => !assignedControllers.includes(c.id));
   }
 
-
   exportToWord() {
     const sections = this.areas.flatMap(item => {
       const rows: TableRow[] = [];
 
-      // صف المشرف
       rows.push(
         new TableRow({
           children: [
             new TableCell({
               children: [
                 new Paragraph({
-                  text: item.supervisors.length
-                    ? item.supervisors.map(s => s.name).join(', ')
-                    : "بدون مشرف",
+                  text: item.supervisors.length ? item.supervisors.map(s => s.name).join(', ') : "بدون مشرف",
                   alignment: AlignmentType.CENTER,
                   bidirectional: true,
                 }),
@@ -289,7 +313,6 @@ export class HomeComponent implements OnInit {
         })
       );
 
-      // صفوف الكنترول
       if (item.controllers.length) {
         item.controllers.forEach(ctrl => {
           rows.push(
@@ -335,7 +358,6 @@ export class HomeComponent implements OnInit {
         );
       }
 
-      // الجدول
       const table = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         alignment: AlignmentType.CENTER,
@@ -347,9 +369,8 @@ export class HomeComponent implements OnInit {
           right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
           insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
           insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        } as any // 🔑 ساعات لازم تتحط cast لو النسخة قديمة
+        } as any
       });
-
 
       return [
         new Paragraph({
@@ -361,7 +382,7 @@ export class HomeComponent implements OnInit {
           ],
         }),
         table,
-        new Paragraph({ text: "", spacing: { after: 400 } }), // فاصل بعد كل جدول
+        new Paragraph({ text: "", spacing: { after: 400 } }),
       ];
     });
 
@@ -392,6 +413,4 @@ export class HomeComponent implements OnInit {
       saveAs(blob, "rotation.docx");
     });
   }
-
-
 }
