@@ -79,6 +79,7 @@ export class HomeComponent implements OnInit {
       { name: "البحيرة", color: "#fd7e14", supervisors: [], controllers: [], image: 'assets/4.jpg' }
     ];
 
+<<<<<<< HEAD
   // الهيكل الجديد للشيفتات — كل مصفوفة واضحة النوع Person[]
   shifts: { shift1: Shift; shift2: Shift } = {
     shift1: {
@@ -91,6 +92,8 @@ export class HomeComponent implements OnInit {
     }
   };
 
+=======
+>>>>>>> d983b1010e9864a691292e06cbf23b05a9759425
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
 
@@ -109,6 +112,7 @@ export class HomeComponent implements OnInit {
 
   // مُعامل الـ drop مضبوط على Person[]
   drop(event: CdkDragDrop<Person[]>) {
+<<<<<<< HEAD
     // تأكيد النوع: item من نوع Person
     const draggedItem: Person = event.previousContainer.data[event.previousIndex];
 
@@ -126,6 +130,47 @@ export class HomeComponent implements OnInit {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
+=======
+    const draggedItem = event.previousContainer.data[event.previousIndex];
+
+    // لو المكان اللي سيب فيه العنصر مش قائمة صالحة → رجّعه تاني
+    if (!event.container.data || !event.container.id) {
+      // نرجعه مكانه
+      event.previousContainer.data.splice(event.previousIndex, 0, draggedItem);
+      return;
+    }
+
+    // منع إضافة أكثر من مشرف لكل منطقة
+    if (event.container.id.endsWith('-sup') && draggedItem.role === 'مشرف' && event.container.data.length >= 1) {
+      return;
+    }
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+      // إزالة من باقي المناطق لو مشرف/كنترول
+      if (draggedItem.role === 'مشرف') {
+        this.areas.forEach(area => {
+          if (area.supervisors !== event.container.data) {
+            area.supervisors = area.supervisors.filter(sup => sup.id !== draggedItem.id);
+          }
+        });
+      }
+      if (draggedItem.role === 'كنترول') {
+        this.areas.forEach(area => {
+          if (area.controllers !== event.container.data) {
+            area.controllers = area.controllers.filter(ctrl => ctrl.id !== draggedItem.id);
+          }
+        });
+      }
+>>>>>>> d983b1010e9864a691292e06cbf23b05a9759425
     }
 
     // نقل العنصر بين القوائم
@@ -159,6 +204,7 @@ export class HomeComponent implements OnInit {
       area.controllers = area.controllers.filter(c => c.id !== p.id);
     });
 
+<<<<<<< HEAD
     // من القوائم الأساسية (لو تم نقله هناك، نتركه فقط في المكان الحالي)
     // Reset القوائم الأساسية لتضمن عدم تكرار: نشيل الشخص لو موجود
     this.supervisors = this.supervisors.filter(s => s.id !== p.id);
@@ -169,6 +215,8 @@ export class HomeComponent implements OnInit {
   }
 
   // ---------- باقي الدوال القديمة (export / save / load) بدون تغيير جوهري ----------
+=======
+>>>>>>> d983b1010e9864a691292e06cbf23b05a9759425
   exportToPDF() {
     const doc = new jsPDF({
       orientation: "portrait",
