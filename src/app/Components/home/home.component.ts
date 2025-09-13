@@ -61,7 +61,7 @@ export class HomeComponent implements OnInit {
       name: "شيفت صباحي",
       color: "#6f42c1",
       supervisors: [],
-      controllers: [],  // حتى لو مش مستخدمة لازم تبقى موجودة
+      controllers: [],
       shifts: [
         { name: "شفت 1", sabahy: [], between: [] },
         { name: "شفت 2", sabahy: [], between: [] }
@@ -93,15 +93,23 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-
-
-
+  // القوائم المتصلة
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
 
+
+
   ngOnInit() {
-    this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
-    this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
+    this.connectedSupervisorLists = this.areas.map(a => a.name + '-sup');
+    this.connectedControllerLists = [
+      ...this.areas.map(a => a.name + '-ctrl'),
+      ...this.areas.flatMap(a =>
+        a.shifts.flatMap(s => [
+          s.name + '-sabahy',
+          s.name + '-between'
+        ])
+      )
+    ];
   }
 
 
