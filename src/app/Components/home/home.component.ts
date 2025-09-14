@@ -292,20 +292,35 @@ export class HomeComponent implements OnInit {
 
 
   exportToWord() {
-    const sections = this.areas.flatMap(item => {
-      const rows: TableRow[] = [];
+    const rows: TableRow[] = [];
 
-      // تجهيز المشرف
-      const supervisorName = item.supervisors.length
-        ? item.supervisors.map(s => s.name).join(', ')
+    // 🟢 هيدر الجدول
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [new Paragraph({ text: "المنطقة", alignment: AlignmentType.CENTER, bidirectional: true })],
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: "المشرف", alignment: AlignmentType.CENTER, bidirectional: true })],
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: "الكنترول", alignment: AlignmentType.CENTER, bidirectional: true })],
+          }),
+        ],
+      })
+    );
+
+    // 🟢 البيانات
+    this.areas.forEach(item => {
+      const supervisorName = item.supervisors && item.supervisors.length
+        ? item.supervisors.map(s => s.name).join(" -- ")
         : "بدون مشرف";
 
-      // تجهيز الكنترول
       const controllersNames = item.controllers && item.controllers.length
-        ? item.controllers.map(c => c.name).join(', ')
+        ? item.controllers.map(c => c.name).join(" -- ")
         : "بدون كنترول";
 
-      // صف واحد فيه (المنطقة + المشرف + الكنترول)
       rows.push(
         new TableRow({
           children: [
@@ -339,56 +354,32 @@ export class HomeComponent implements OnInit {
           ],
         })
       );
+    });
 
-      // الجدول
-      const table = new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        alignment: AlignmentType.CENTER,
-        rows: [
-          // هيدر الأعمدة
-          new TableRow({
-            children: [
-              new TableCell({
-                children: [new Paragraph({ text: "المنطقة", alignment: AlignmentType.CENTER })],
-              }),
-              new TableCell({
-                children: [new Paragraph({ text: "المشرف", alignment: AlignmentType.CENTER })],
-              }),
-              new TableCell({
-                children: [new Paragraph({ text: "الكنترول", alignment: AlignmentType.CENTER })],
-              }),
-            ],
-          }),
-          ...rows,
-        ],
-        borders: {
-          top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-          insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        } as any,
-      });
-
-      return [
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          bidirectional: true,
-          spacing: { after: 200 },
-          children: [
-            new TextRun({ text: item.name, bold: true, size: 32 }),
-          ],
-        }),
-        table,
-        new Paragraph({ text: "", spacing: { after: 400 } }), // فاصل بعد كل جدول
-      ];
+    // 🟢 جدول واحد لكل المناطق
+    const table = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      alignment: AlignmentType.CENTER,
+      rows,
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+        bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+        left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+        right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+        insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+      } as any,
     });
 
     const doc = new Document({
       sections: [
         {
-          properties: {},
+          properties: {
+            page: {
+              // 🟢 نخلي الصفحة كلها RTL
+              textDirection: "lrTb",
+            },
+          },
           children: [
             new Paragraph({
               alignment: AlignmentType.CENTER,
@@ -402,7 +393,7 @@ export class HomeComponent implements OnInit {
                 }),
               ],
             }),
-            ...sections,
+            table,
           ],
         },
       ],
@@ -412,7 +403,5 @@ export class HomeComponent implements OnInit {
       saveAs(blob, "rotation.docx");
     });
   }
-
-
 
 }
