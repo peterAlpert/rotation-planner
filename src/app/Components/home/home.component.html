@@ -38,13 +38,17 @@
                                 {{ area.supervisors[0].name }}
                             </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
-                            <div *ngIf="area.supervisors.length === 0" class="empty-box">
+                            <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
+                                [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
+                                [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)">
                                 اسحب مشرف هنا
                             </div>
                         </h4>
-                        <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
+
+
+                        <!-- <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                             [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
-                            class="list"></div>
+                            class="list"></div> -->
 
                         <!-- الشفتات -->
                         <div *ngFor="let shift of area.shifts" class="shift-box mb-3">
