@@ -166,47 +166,6 @@ export class HomeComponent implements OnInit {
     }
   }
 
-
-
-  // exportToPDF() {
-  //   const doc = new jsPDF({
-  //     orientation: "portrait",
-  //     unit: "pt",
-  //     format: "a4"
-  //   });
-
-  //   // تحميل الخط
-  //   doc.addFileToVFS("Cairo-Regular.ttf", cairoFont);
-  //   doc.addFont("Cairo-Regular.ttf", "Cairo", "normal");
-  //   doc.setFont("Cairo");
-
-  //   // نص تجريبي RTL
-  //   doc.text("تجربة تصدير PDF بخط Cairo", 400, 40, { align: "right" });
-
-  //   // تجهيز البيانات
-  //   const data = this.areas.map(area => [
-  //     area.name,
-  //     area.supervisors.length ? area.supervisors[0].name : 'بدون مشرف',
-  //     area.controllers.map(c => c.name).join(', ')
-  //   ]);
-
-  //   autoTable(doc, {
-  //     head: [['المنطقة', 'المشرف', 'الكنترولات']],
-  //     body: data,
-  //     theme: 'grid',
-  //     headStyles: { fillColor: [255, 193, 7] },
-  //     styles: { font: "Cairo", fontSize: 12, halign: "right" }, // مهم
-  //     columnStyles: {
-  //       0: { halign: 'right' },
-  //       1: { halign: 'right' },
-  //       2: { halign: 'right' }
-  //     }
-  //   });
-
-  //   doc.save('توزيع_المشرفين_والكنترول.pdf');
-  // }
-
-
   // حفظ التوزيع في Local Storage
 
   saveDistribution() {
@@ -311,6 +270,26 @@ export class HomeComponent implements OnInit {
 
     this.supervisors = this.supervisors.filter(s => !assignedSupervisors.includes(s.id));
     this.controllers = this.controllers.filter(c => !assignedControllers.includes(c.id));
+  }
+
+  removePerson(person: Person, area: Area, type: 'supervisor' | 'controller') {
+    if (type === 'supervisor') {
+      // رجع المشرف للقائمة الأصلية
+      this.supervisors.push(person);
+      // امسحه من المنطقة
+      area.supervisors = area.supervisors.filter(s => s.id !== person.id);
+    } else {
+      // رجع الكنترول للقائمة الأصلية
+      this.controllers.push(person);
+      // امسحه من المنطقة
+      area.controllers = area.controllers.filter(c => c.id !== person.id);
+
+      // كمان لو الكنترول متوزع في أي شيفت جوه المنطقة → شيله
+      area.shifts.forEach(shift => {
+        shift.sabahy = shift.sabahy.filter(c => c.id !== person.id);
+        shift.between = shift.between.filter(c => c.id !== person.id);
+      });
+    }
   }
 
 

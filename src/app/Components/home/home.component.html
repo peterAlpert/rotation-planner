@@ -36,6 +36,8 @@
                             👨‍💼
                             <span *ngIf="area.supervisors.length > 0" class="fs-1">
                                 {{ area.supervisors[0].name }}
+                                <span class="remove-btn"
+                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
                             </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
@@ -44,11 +46,6 @@
                                 اسحب مشرف هنا
                             </div>
                         </h4>
-
-
-                        <!-- <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
-                            [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
-                            class="list"></div> -->
 
                         <!-- الشفتات -->
                         <div *ngFor="let shift of area.shifts" class="shift-box mb-3">
@@ -63,6 +60,8 @@
                                         <div *ngFor="let ctrl of shift.sabahy" cdkDrag
                                             class="item controller text-center">
                                             {{ ctrl.name }}
+                                            <span class="remove-btn"
+                                                (click)="removePerson(ctrl, area, 'controller')">×</span>
                                         </div>
                                     </div>
                                 </div>
@@ -76,6 +75,8 @@
                                         <div *ngFor="let ctrl of shift.between" cdkDrag
                                             class="item controller text-center">
                                             {{ ctrl.name }}
+                                            <span class="remove-btn"
+                                                (click)="removePerson(ctrl, area, 'controller')">×</span>
                                         </div>
                                     </div>
                                 </div>
@@ -88,15 +89,21 @@
                         <!-- المشرف -->
                         <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
                             👨‍💼
-                            <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}</span>
+                            <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}<span
+                                    class="remove-btn"
+                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
+
+                            </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
-                            <div *ngIf="area.supervisors.length === 0" class="empty-box">
+                            <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
+                                [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
+                                [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)">
                                 اسحب مشرف هنا
                             </div>
                         </h4>
-                        <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
+                        <!-- <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                             [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
-                            class="list"></div>
+                            class="list"></div> -->
 
                         <!-- الكنترول -->
                         <h6 class="text-light text-center mt-3">🎯 الكنترول ({{ area.controllers.length }})</h6>
@@ -106,6 +113,7 @@
                             <div *ngFor="let ctrl of area.controllers" cdkDrag
                                 class="item controller text-center person controller">
                                 {{ ctrl.name }}
+                                <span class="remove-btn" (click)="removePerson(ctrl, area, 'controller')">×</span>
                             </div>
                         </div>
                     </ng-template>
