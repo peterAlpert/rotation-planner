@@ -293,37 +293,33 @@ export class HomeComponent implements OnInit {
 
   exportToWord() {
     const sections = this.areas.flatMap(item => {
-      const rows: TableRow[] = [];
+      const blocks: (Paragraph | Table)[] = [];
 
-      // صف المشرف
-      rows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  text: item.supervisors.length
-                    ? item.supervisors.map(s => s.name).join(', ')
-                    : "بدون مشرف",
-                  alignment: AlignmentType.CENTER,
-                  bidirectional: true,
-                }),
-              ],
-            }),
-          ],
+      // 🟢 عنوان المنطقة
+      blocks.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+          spacing: { after: 200 },
+          children: [new TextRun({ text: item.name, bold: true, size: 32 })],
         })
       );
 
-      // صفوف الكنترول
-      if (item.controllers.length) {
-        item.controllers.forEach(ctrl => {
+      // 🟢 لو المنطقة فيها شيفتات داخلية
+      if (item.shifts && item.shifts.length) {
+        item.shifts.forEach(shift => {
+          const rows: TableRow[] = [];
+
+          // المشرفين
           rows.push(
             new TableRow({
               children: [
                 new TableCell({
                   children: [
                     new Paragraph({
-                      text: ctrl.name,
+                      text: shift.sabahy.length
+                        ? shift.sabahy.map(s => s.name).join(', ')
+                        : "بدون مشرف",
                       alignment: AlignmentType.CENTER,
                       bidirectional: true,
                     }),
@@ -332,24 +328,84 @@ export class HomeComponent implements OnInit {
               ],
             })
           );
+
+          // الكنترول
+          if (shift.between.length) {
+            shift.between.forEach(ctrl => {
+              rows.push(
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: ctrl.name,
+                          alignment: AlignmentType.CENTER,
+                          bidirectional: true,
+                        }),
+                      ],
+                    }),
+                  ],
+                })
+              );
+            });
+          } else {
+            rows.push(
+              new TableRow({
+                children: [
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        text: "بدون كنترول",
+                        alignment: AlignmentType.CENTER,
+                        bidirectional: true,
+                      }),
+                    ],
+                  }),
+                ],
+              })
+            );
+          }
+
+          // 🟢 جدول الشيفت
+          const shiftTable = new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            alignment: AlignmentType.CENTER,
+            rows,
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+              bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+              left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+              right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+              insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+              insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+            } as any,
+          });
+
+          // 🟢 عنوان الشيفت
+          blocks.push(
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              bidirectional: true,
+              spacing: { after: 100 },
+              children: [new TextRun({ text: shift.name, bold: true, size: 26 })],
+            }),
+            shiftTable,
+            new Paragraph({ text: "", spacing: { after: 200 } })
+          );
         });
       } else {
+        // 🟢 نفس الكود القديم (للملاعب والجاردن والبحيرة)
+        const rows: TableRow[] = [];
+
         rows.push(
           new TableRow({
             children: [
               new TableCell({
                 children: [
                   new Paragraph({
-                    text: "كنترول",
-                    alignment: AlignmentType.CENTER,
-                    bidirectional: true,
-                  }),
-                ],
-              }),
-              new TableCell({
-                children: [
-                  new Paragraph({
-                    text: "بدون كنترول",
+                    text: item.supervisors.length
+                      ? item.supervisors.map(s => s.name).join(', ')
+                      : "بدون مشرف",
                     alignment: AlignmentType.CENTER,
                     bidirectional: true,
                   }),
@@ -358,36 +414,61 @@ export class HomeComponent implements OnInit {
             ],
           })
         );
+
+        if (item.controllers.length) {
+          item.controllers.forEach(ctrl => {
+            rows.push(
+              new TableRow({
+                children: [
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        text: ctrl.name,
+                        alignment: AlignmentType.CENTER,
+                        bidirectional: true,
+                      }),
+                    ],
+                  }),
+                ],
+              })
+            );
+          });
+        } else {
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      text: "بدون كنترول",
+                      alignment: AlignmentType.CENTER,
+                      bidirectional: true,
+                    }),
+                  ],
+                }),
+              ],
+            })
+          );
+        }
+
+        const table = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          alignment: AlignmentType.CENTER,
+          rows,
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+            insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+            insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+          } as any,
+        });
+
+        blocks.push(table, new Paragraph({ text: "", spacing: { after: 400 } }));
       }
 
-      // الجدول
-      const table = new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        alignment: AlignmentType.CENTER,
-        rows,
-        borders: {
-          top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-          insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-          insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        } as any // 🔑 ساعات لازم تتحط cast لو النسخة قديمة
-      });
-
-
-      return [
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          bidirectional: true,
-          spacing: { after: 200 },
-          children: [
-            new TextRun({ text: item.name, bold: true, size: 32 }),
-          ],
-        }),
-        table,
-        new Paragraph({ text: "", spacing: { after: 400 } }), // فاصل بعد كل جدول
-      ];
+      return blocks;
     });
 
     const doc = new Document({
@@ -417,5 +498,6 @@ export class HomeComponent implements OnInit {
       saveAs(blob, "rotation.docx");
     });
   }
+
 
 }
