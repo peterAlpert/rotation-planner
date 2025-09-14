@@ -89,10 +89,10 @@
                         <!-- المشرف -->
                         <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
                             👨‍💼
-                            <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}<span
-                                    class="remove-btn"
+                            <span *ngIf="area.supervisors.length > 0" class="fs-1">
+                                {{ area.supervisors[0].name }}
+                                <span class="remove-btn"
                                     (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
-
                             </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
@@ -101,9 +101,6 @@
                                 اسحب مشرف هنا
                             </div>
                         </h4>
-                        <!-- <div cdkDropList [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
-                            [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)"
-                            class="list"></div> -->
 
                         <!-- الكنترول -->
                         <h6 class="text-light text-center mt-3">🎯 الكنترول ({{ area.controllers.length }})</h6>
