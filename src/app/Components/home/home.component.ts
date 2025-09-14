@@ -2,15 +2,10 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
 import { Component, OnInit } from '@angular/core';
 import { TableRow, TableCell, Paragraph, AlignmentType, Document, TextRun, WidthType, BorderStyle, Packer, Table } from 'docx';
 import saveAs from 'file-saver';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-import { cairoFont } from '../../../../public/assets/cairo';
 import { Person } from '../../person';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { Shift } from '../../Models/shift';
 import { Area } from '../../Models/area';
 
 @Component({
@@ -53,7 +48,9 @@ export class HomeComponent implements OnInit {
     { id: 25, name: "جالا جمال", role: "كنترول" },
     { id: 26, name: "اندرو عماد", role: "كنترول" },
     { id: 27, name: "مريم يني", role: "كنترول" },
-    { id: 28, name: "مريان اميل", role: "كنترول" }
+    { id: 28, name: "مريان اميل", role: "كنترول" },
+    { id: 28, name: "رنا خالد", role: "كنترول" }
+
   ];
 
   areas: Area[] = [
@@ -63,8 +60,8 @@ export class HomeComponent implements OnInit {
       supervisors: [],
       controllers: [],
       shifts: [
-        { name: "شفت 1", sabahy: [], between: [] },
-        { name: "شفت 2", sabahy: [], between: [] }
+        { name: "شفت 1 - من يوم 16 الي 31", sabahy: [], between: [] },
+        { name: "شفت 2 - من يوم 1 الي 15", sabahy: [], between: [] }
       ]
     },
     {
@@ -259,7 +256,8 @@ export class HomeComponent implements OnInit {
       { id: 25, name: "جالا جمال", role: "كنترول" },
       { id: 26, name: "اندرو عماد", role: "كنترول" },
       { id: 27, name: "مريم يني", role: "كنترول" },
-      { id: 28, name: "مريان اميل", role: "كنترول" }
+      { id: 28, name: "مريان اميل", role: "كنترول" },
+      { id: 28, name: "رنا خالد", role: "كنترول" }
     ];
   }
 
@@ -297,16 +295,42 @@ export class HomeComponent implements OnInit {
     const sections = this.areas.flatMap(item => {
       const rows: TableRow[] = [];
 
-      // صف المشرف
+      // تجهيز المشرف
+      const supervisorName = item.supervisors.length
+        ? item.supervisors.map(s => s.name).join(', ')
+        : "بدون مشرف";
+
+      // تجهيز الكنترول
+      const controllersNames = item.controllers && item.controllers.length
+        ? item.controllers.map(c => c.name).join(', ')
+        : "بدون كنترول";
+
+      // صف واحد فيه (المنطقة + المشرف + الكنترول)
       rows.push(
         new TableRow({
           children: [
             new TableCell({
               children: [
                 new Paragraph({
-                  text: item.supervisors.length
-                    ? item.supervisors.map(s => s.name).join(', ')
-                    : "بدون مشرف",
+                  text: item.name,
+                  alignment: AlignmentType.CENTER,
+                  bidirectional: true,
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  text: supervisorName,
+                  alignment: AlignmentType.CENTER,
+                  bidirectional: true,
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  text: controllersNames,
                   alignment: AlignmentType.CENTER,
                   bidirectional: true,
                 }),
@@ -316,57 +340,27 @@ export class HomeComponent implements OnInit {
         })
       );
 
-      // صفوف الكنترول
-      if (item.controllers.length) {
-        item.controllers.forEach(ctrl => {
-          rows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      text: ctrl.name,
-                      alignment: AlignmentType.CENTER,
-                      bidirectional: true,
-                    }),
-                  ],
-                }),
-              ],
-            })
-          );
-        });
-      } else {
-        rows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                children: [
-                  new Paragraph({
-                    text: "كنترول",
-                    alignment: AlignmentType.CENTER,
-                    bidirectional: true,
-                  }),
-                ],
-              }),
-              new TableCell({
-                children: [
-                  new Paragraph({
-                    text: "بدون كنترول",
-                    alignment: AlignmentType.CENTER,
-                    bidirectional: true,
-                  }),
-                ],
-              }),
-            ],
-          })
-        );
-      }
-
       // الجدول
       const table = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         alignment: AlignmentType.CENTER,
-        rows,
+        rows: [
+          // هيدر الأعمدة
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ text: "المنطقة", alignment: AlignmentType.CENTER })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: "المشرف", alignment: AlignmentType.CENTER })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: "الكنترول", alignment: AlignmentType.CENTER })],
+              }),
+            ],
+          }),
+          ...rows,
+        ],
         borders: {
           top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
           bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
@@ -374,9 +368,8 @@ export class HomeComponent implements OnInit {
           right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
           insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
           insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        } as any // 🔑 ساعات لازم تتحط cast لو النسخة قديمة
+        } as any,
       });
-
 
       return [
         new Paragraph({
@@ -419,6 +412,7 @@ export class HomeComponent implements OnInit {
       saveAs(blob, "rotation.docx");
     });
   }
+
 
 
 }

@@ -36,8 +36,8 @@
                             👨‍💼
                             <span *ngIf="area.supervisors.length > 0" class="fs-1">
                                 {{ area.supervisors[0].name }}
-                                <span class="remove-btn"
-                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
+                                <i class="fas fa-times remove-btn"
+                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')"></i>
                             </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
@@ -60,8 +60,8 @@
                                         <div *ngFor="let ctrl of shift.sabahy" cdkDrag
                                             class="item controller text-center">
                                             {{ ctrl.name }}
-                                            <span class="remove-btn"
-                                                (click)="removePerson(ctrl, area, 'controller')">×</span>
+                                            <i class="fas fa-times remove-btn"
+                                                (click)="removePerson(ctrl, area, 'controller')"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -75,8 +75,8 @@
                                         <div *ngFor="let ctrl of shift.between" cdkDrag
                                             class="item controller text-center">
                                             {{ ctrl.name }}
-                                            <span class="remove-btn"
-                                                (click)="removePerson(ctrl, area, 'controller')">×</span>
+                                            <i class="fas fa-times remove-btn"
+                                                (click)="removePerson(ctrl, area, 'controller')"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -89,10 +89,9 @@
                         <!-- المشرف -->
                         <h4 class="fw-bold text-center mb-3" [style.color]="area.color">
                             👨‍💼
-                            <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}<span
-                                    class="remove-btn"
-                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
-
+                            <span *ngIf="area.supervisors.length > 0" class="fs-1">{{ area.supervisors[0].name }}
+                                <i class="fas fa-times remove-btn"
+                                    (click)="removePerson(area.supervisors[0], area, 'supervisor')"></i>
                             </span>
                             <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
