@@ -292,33 +292,16 @@ export class HomeComponent implements OnInit {
 
 
   exportToWord() {
-    const rows: TableRow[] = [];
+    const sections = this.areas.flatMap(item => {
+      const rows: TableRow[] = [];
 
-    // 🟢 هيدر الجدول
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ text: "المنطقة", alignment: AlignmentType.CENTER, bidirectional: true })],
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: "المشرف", alignment: AlignmentType.CENTER, bidirectional: true })],
-          }),
-          new TableCell({
-            children: [new Paragraph({ text: "الكنترول", alignment: AlignmentType.CENTER, bidirectional: true })],
-          }),
-        ],
-      })
-    );
-
-    // 🟢 البيانات
-    this.areas.forEach(item => {
-      const supervisorName = item.supervisors && item.supervisors.length
-        ? item.supervisors.map(s => s.name).join(" -- ")
+      // صف بيانات المنطقة
+      const supervisorsText = item.supervisors.length
+        ? item.supervisors.map(s => s.name).join(', ')
         : "بدون مشرف";
 
-      const controllersNames = item.controllers && item.controllers.length
-        ? item.controllers.map(c => c.name).join(" -- ")
+      const controllersText = item.controllers.length
+        ? item.controllers.map(c => c.name).join(', ')
         : "بدون كنترول";
 
       rows.push(
@@ -336,7 +319,7 @@ export class HomeComponent implements OnInit {
             new TableCell({
               children: [
                 new Paragraph({
-                  text: supervisorName,
+                  text: supervisorsText,
                   alignment: AlignmentType.CENTER,
                   bidirectional: true,
                 }),
@@ -345,7 +328,7 @@ export class HomeComponent implements OnInit {
             new TableCell({
               children: [
                 new Paragraph({
-                  text: controllersNames,
+                  text: controllersText,
                   alignment: AlignmentType.CENTER,
                   bidirectional: true,
                 }),
@@ -354,32 +337,40 @@ export class HomeComponent implements OnInit {
           ],
         })
       );
-    });
 
-    // 🟢 جدول واحد لكل المناطق
-    const table = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      alignment: AlignmentType.CENTER,
-      rows,
-      borders: {
-        top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-        bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-        left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-        right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
-        insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-      } as any,
+      // إنشاء الجدول
+      const table = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        alignment: AlignmentType.CENTER,
+        rows,
+        borders: {
+          top: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+          bottom: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+          left: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+          right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
+          insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+          insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
+        } as any,
+      });
+
+      return [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+          spacing: { after: 200 },
+          children: [
+            new TextRun({ text: item.name, bold: true, size: 32 }),
+          ],
+        }),
+        table,
+        new Paragraph({ text: "", spacing: { after: 400 } }), // فاصل بعد كل جدول
+      ];
     });
 
     const doc = new Document({
       sections: [
         {
-          properties: {
-            page: {
-              // 🟢 نخلي الصفحة كلها RTL
-              textDirection: "lrTb",
-            },
-          },
+          properties: {},
           children: [
             new Paragraph({
               alignment: AlignmentType.CENTER,
@@ -393,7 +384,7 @@ export class HomeComponent implements OnInit {
                 }),
               ],
             }),
-            table,
+            ...sections,
           ],
         },
       ],
