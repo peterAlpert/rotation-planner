@@ -295,40 +295,16 @@ export class HomeComponent implements OnInit {
     const sections = this.areas.flatMap(item => {
       const rows: TableRow[] = [];
 
-      // صف بيانات المنطقة
-      const supervisorsText = item.supervisors.length
-        ? item.supervisors.map(s => s.name).join(', ')
-        : "بدون مشرف";
-
-      const controllersText = item.controllers.length
-        ? item.controllers.map(c => c.name).join(', ')
-        : "بدون كنترول";
-
+      // صف المشرف
       rows.push(
         new TableRow({
           children: [
             new TableCell({
               children: [
                 new Paragraph({
-                  text: item.name,
-                  alignment: AlignmentType.CENTER,
-                  bidirectional: true,
-                }),
-              ],
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  text: supervisorsText,
-                  alignment: AlignmentType.CENTER,
-                  bidirectional: true,
-                }),
-              ],
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  text: controllersText,
+                  text: item.supervisors.length
+                    ? item.supervisors.map(s => s.name).join(', ')
+                    : "بدون مشرف",
                   alignment: AlignmentType.CENTER,
                   bidirectional: true,
                 }),
@@ -338,7 +314,53 @@ export class HomeComponent implements OnInit {
         })
       );
 
-      // إنشاء الجدول
+      // صفوف الكنترول
+      if (item.controllers.length) {
+        item.controllers.forEach(ctrl => {
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      text: ctrl.name,
+                      alignment: AlignmentType.CENTER,
+                      bidirectional: true,
+                    }),
+                  ],
+                }),
+              ],
+            })
+          );
+        });
+      } else {
+        rows.push(
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    text: "كنترول",
+                    alignment: AlignmentType.CENTER,
+                    bidirectional: true,
+                  }),
+                ],
+              }),
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    text: "بدون كنترول",
+                    alignment: AlignmentType.CENTER,
+                    bidirectional: true,
+                  }),
+                ],
+              }),
+            ],
+          })
+        );
+      }
+
+      // الجدول
       const table = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         alignment: AlignmentType.CENTER,
@@ -350,8 +372,9 @@ export class HomeComponent implements OnInit {
           right: { style: BorderStyle.SINGLE, size: 5, color: "000000" },
           insideHorizontal: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
           insideVertical: { style: BorderStyle.SINGLE, size: 3, color: "000000" },
-        } as any,
+        } as any // 🔑 ساعات لازم تتحط cast لو النسخة قديمة
       });
+
 
       return [
         new Paragraph({
