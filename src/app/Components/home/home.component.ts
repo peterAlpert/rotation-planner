@@ -444,9 +444,9 @@ export class HomeComponent implements OnInit, OnDestroy {
           // 🟢 عنوان الشيفت
           blocks.push(
             new Paragraph({
-              alignment: AlignmentType.RIGHT,
+              alignment: AlignmentType.LEFT,
               bidirectional: true,
-              spacing: { after: 100 },
+              spacing: { after: 200 },
               children: [new TextRun({ text: shift.name, bold: true, size: 26 })],
             }),
             shiftTable,
@@ -544,7 +544,7 @@ export class HomeComponent implements OnInit, OnDestroy {
                 new TextRun({
                   text: "توزيعة شغل وادي دجلة",
                   bold: true,
-                  size: 28,
+                  size: 36,
                 }),
               ],
             }),
