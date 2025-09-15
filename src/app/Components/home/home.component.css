@@ -16,8 +16,12 @@
     text-align: center;
     cursor: grab;
     font-weight: bold;
-    transition: transform 0.2s, box-shadow 0.3s;
+    transition: transform 0.2s, background 0.2s;
     animation: fadeInUp 0.4s ease;
+}
+
+.item:active {
+    cursor: grabbing;
 }
 
 .item:hover {
@@ -143,6 +147,8 @@
 
 /* Drag & Drop Animations */
 .cdk-drag-preview {
+    background: #34495e;
+    padding: 8px 12px;
     transform: rotate(5deg) scale(1.1);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
     border-radius: 12px;
