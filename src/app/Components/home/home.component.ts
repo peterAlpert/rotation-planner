@@ -498,6 +498,4 @@ export class HomeComponent implements OnInit {
       saveAs(blob, "rotation.docx");
     });
   }
-
-
 }
