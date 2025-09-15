@@ -184,8 +184,9 @@
     }
 }
 
-.scroll-container {
-    max-height: 80vh;
-    /* أو أي طول مناسب */
+.col-9 {
+    max-height: 90vh;
+    /* ارتفاع مناسب */
     overflow-y: auto;
+    /* يخلي العمود يـ scroll */
 }
