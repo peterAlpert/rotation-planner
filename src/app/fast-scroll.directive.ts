@@ -1,24 +1,22 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[cdkDropList]' // 🔥 هيتطبق تلقائي على أي DropList
+  selector: '[fastScroll]'
 })
 export class FastScrollDirective {
-  private scrollSpeed = 50; // السرعة (غيّرها حسب راحتك)
-  private scrollZone = 120; // المسافة اللي يبدأ عندها يعمل scroll
+  private scrollSpeed = 100; // 🔥 زود الرقم لتسريع
 
   constructor(private el: ElementRef) { }
 
   @HostListener('document:dragover', ['$event'])
   onDragOver(event: DragEvent) {
+    const { top, bottom } = this.el.nativeElement.getBoundingClientRect();
+    const scrollZone = 10; // المسافة اللي يبدأ عندها يعمل scroll
     const container = this.el.nativeElement;
-    if (!container) return;
 
-    const { top, bottom } = container.getBoundingClientRect();
-
-    if (event.clientY < top + this.scrollZone) {
+    if (event.clientY < top + scrollZone) {
       container.scrollTop -= this.scrollSpeed;
-    } else if (event.clientY > bottom - this.scrollZone) {
+    } else if (event.clientY > bottom - scrollZone) {
       container.scrollTop += this.scrollSpeed;
     }
   }
