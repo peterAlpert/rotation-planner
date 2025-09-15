@@ -185,7 +185,7 @@
 }
 
 .areas-scroll {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 110px);
     /* عدّل رقم ال 140 حسب ال header/space عندك */
     overflow-y: auto;
     padding-right: 8px;
