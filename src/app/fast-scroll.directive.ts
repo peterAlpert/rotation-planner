@@ -1,7 +1,8 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[fastScroll]'
+  selector: '[fastScroll]',
+  standalone: true
 })
 export class FastScrollDirective {
   private scrollSpeed = 200;   // 🔥 زود الرقم لسرعة أكبر

@@ -7,11 +7,12 @@ import Swal from 'sweetalert2';
 import { Person } from '../../person';
 import { CommonModule } from '@angular/common';
 import { Area } from '../../Models/area';
+import { FastScrollDirective } from '../../fast-scroll.directive';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [DragDropModule, CommonModule],
+  imports: [DragDropModule, CommonModule, FastScrollDirective],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
