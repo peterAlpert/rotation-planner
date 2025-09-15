@@ -4,19 +4,23 @@ import { Directive, ElementRef, HostListener } from '@angular/core';
   selector: '[fastScroll]'
 })
 export class FastScrollDirective {
-  private scrollSpeed = 100; // 🔥 زود الرقم لتسريع
+  private scrollSpeed = 40; // كل tick يزود/ينقص (جرب تزودها)
+  private scrollZone = 80;  // يبدأ يعمل scroll لما يقرب من الحافة بالبكسل
 
   constructor(private el: ElementRef) { }
 
   @HostListener('document:dragover', ['$event'])
   onDragOver(event: DragEvent) {
-    const { top, bottom } = this.el.nativeElement.getBoundingClientRect();
-    const scrollZone = 10; // المسافة اللي يبدأ عندها يعمل scroll
-    const container = this.el.nativeElement;
+    const container = this.el.nativeElement as HTMLElement;
 
-    if (event.clientY < top + scrollZone) {
+    // لازم يكون عنده scroll
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    const { top, bottom } = container.getBoundingClientRect();
+
+    if (event.clientY < top + this.scrollZone) {
       container.scrollTop -= this.scrollSpeed;
-    } else if (event.clientY > bottom - scrollZone) {
+    } else if (event.clientY > bottom - this.scrollZone) {
       container.scrollTop += this.scrollSpeed;
     }
   }

@@ -183,3 +183,9 @@
         transform: translateY(0);
     }
 }
+
+.scroll-container {
+    max-height: 80vh;
+    /* أو أي طول مناسب */
+    overflow-y: auto;
+}
