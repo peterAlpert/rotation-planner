@@ -184,9 +184,10 @@
     }
 }
 
-.fast-scroll-container {
-    max-height: 85vh;
-    /* حسب الشاشة */
+.areas-scroll {
+    max-height: calc(100vh - 140px);
+    /* عدّل رقم ال 140 حسب ال header/space عندك */
     overflow-y: auto;
-    overflow-x: hidden;
+    padding-right: 8px;
+    /* مسافة بسيطة على اليمين */
 }

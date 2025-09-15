@@ -5,7 +5,8 @@
         <div cdkDropList id="supervisors" [cdkDropListData]="supervisors"
             [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)" class="list">
             <div class="row">
-                <div class="col-6" *ngFor="let sup of supervisors" cdkDrag>
+                <div class="col-6" *ngFor="let sup of supervisors" cdkDrag (cdkDragStarted)="onDragStarted()"
+                    (cdkDragEnded)="onDragEnded()">
                     <div class="item supervisor text-center">{{ sup.name }}</div>
                 </div>
             </div>
@@ -15,15 +16,16 @@
         <div cdkDropList id="controllers" [cdkDropListData]="controllers"
             [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)" class="list">
             <div class="row">
-                <div class="col-6" *ngFor="let ctrl of controllers" cdkDrag>
+                <div class="col-6" *ngFor="let ctrl of controllers" cdkDrag (cdkDragStarted)="onDragStarted()"
+                    (cdkDragEnded)="onDragEnded()">
                     <div class="item controller text-center">{{ ctrl.name }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- العمود الشمال: المناطق -->
-    <div class="col-9 fast-scroll-container" fastScroll>
+    <!-- العمود الشمال: المناطق (قابل للتمرير) -->
+    <div class="col-9 areas-scroll" #areasContainer>
         <div class="row">
             <div class="col-md-6 mb-4" *ngFor="let area of areas">
                 <div class="area-card p-3 h-100 d-flex flex-column" [style.borderColor]="area.color">
@@ -39,7 +41,6 @@
                                 <span class="remove-btn"
                                     (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
                             </span>
-                            <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
                                 [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                                 [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)">
@@ -58,6 +59,7 @@
                                         [cdkDropListConnectedTo]="connectedControllerLists"
                                         (cdkDropListDropped)="drop($event)" class="list">
                                         <div *ngFor="let ctrl of shift.sabahy" cdkDrag
+                                            (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
                                             class="item controller text-center">
                                             {{ ctrl.name }}
                                             <span class="remove-btn"
@@ -66,13 +68,14 @@
                                     </div>
                                 </div>
 
-                                <!-- Betwen -->
+                                <!-- Between -->
                                 <div class="col-6">
                                     <h6 class="text-center text-info">بيتوين</h6>
                                     <div cdkDropList [id]="shift.name + '-between'" [cdkDropListData]="shift.between"
                                         [cdkDropListConnectedTo]="connectedControllerLists"
                                         (cdkDropListDropped)="drop($event)" class="list">
                                         <div *ngFor="let ctrl of shift.between" cdkDrag
+                                            (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
                                             class="item controller text-center">
                                             {{ ctrl.name }}
                                             <span class="remove-btn"
@@ -94,7 +97,6 @@
                                 <span class="remove-btn"
                                     (click)="removePerson(area.supervisors[0], area, 'supervisor')">×</span>
                             </span>
-                            <!-- مربع فارغ بيظهر لو مفيش مشرف -->
                             <div *ngIf="area.supervisors.length === 0" class="empty-box list" cdkDropList
                                 [id]="area.name + '-sup'" [cdkDropListData]="area.supervisors"
                                 [cdkDropListConnectedTo]="connectedSupervisorLists" (cdkDropListDropped)="drop($event)">
@@ -107,8 +109,8 @@
                         <div cdkDropList [id]="area.name + '-ctrl'" [cdkDropListData]="area.controllers"
                             [cdkDropListConnectedTo]="connectedControllerLists" (cdkDropListDropped)="drop($event)"
                             class="list controllers-box">
-                            <div *ngFor="let ctrl of area.controllers" cdkDrag
-                                class="item controller text-center person controller">
+                            <div *ngFor="let ctrl of area.controllers" cdkDrag (cdkDragStarted)="onDragStarted()"
+                                (cdkDragEnded)="onDragEnded()" class="item controller text-center person controller">
                                 {{ ctrl.name }}
                                 <span class="remove-btn" (click)="removePerson(ctrl, area, 'controller')">×</span>
                             </div>
@@ -123,9 +125,6 @@
         <button class="btn btn-success" (click)="saveDistribution()">💾 حفظ</button>
         <button class="btn btn-info" (click)="loadDistribution()">📂 تحميل</button>
         <button class="btn btn-warning" (click)="resetDistribution()">♻️ إعادة</button>
-        <!-- <button class="btn btn-primary" (click)="exportToPDF()">📥 تصدير PDF</button> -->
         <button class="btn btn-success" (click)="exportToWord()">📥 تصدير Word</button>
-
     </div>
-
 </div>

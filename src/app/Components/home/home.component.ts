@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { TableRow, TableCell, Paragraph, AlignmentType, Document, TextRun, WidthType, BorderStyle, Packer, Table } from 'docx';
 import saveAs from 'file-saver';
 import { ToastrService } from 'ngx-toastr';
@@ -7,17 +7,18 @@ import Swal from 'sweetalert2';
 import { Person } from '../../person';
 import { CommonModule } from '@angular/common';
 import { Area } from '../../Models/area';
-import { FastScrollDirective } from './fast-scroll.directive';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [DragDropModule, CommonModule, FastScrollDirective],
+  imports: [DragDropModule, CommonModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
-  constructor(private toastr: ToastrService) { }
+export class HomeComponent implements OnInit, OnDestroy {
+  constructor(private toastr: ToastrService, private ngZone: NgZone) { }
+
+  // ----- بيانات المستخدمين -----
   supervisors: Person[] = [
     { id: 1, name: "حسام حسن", role: "مشرف" },
     { id: 2, name: "شيرين اكرام", role: "مشرف" },
@@ -50,10 +51,10 @@ export class HomeComponent implements OnInit {
     { id: 26, name: "اندرو عماد", role: "كنترول" },
     { id: 27, name: "مريم يني", role: "كنترول" },
     { id: 28, name: "مريان اميل", role: "كنترول" },
-    { id: 28, name: "رنا خالد", role: "كنترول" }
-
+    { id: 29, name: "رنا خالد", role: "كنترول" }
   ];
 
+  // ----- المناطق (بما فيها شيفت صباحي مقسوم) -----
   areas: Area[] = [
     {
       name: "شيفت صباحي",
@@ -91,16 +92,25 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  // القوائم المتصلة
   connectedSupervisorLists: string[] = [];
   connectedControllerLists: string[] = [];
 
+  // ---------------- fast-scroll state ----------------
+  @ViewChild('areasContainer', { static: true }) areasContainer!: ElementRef<HTMLElement>;
+  private isDragging = false;
+  private lastPointerEvent: PointerEvent | null = null;
+  private rafId = 0;
+  private pointerMoveHandler = (e: PointerEvent) => { this.lastPointerEvent = e; };
 
+  // قابل للتعديل: سرعة السكروول و مساحة التفعيل
+  private maxSpeed = 60; // pixels per frame (زدّه لو عايز أسرع)
+  private scrollZone = 140; // المسافة من الحافة التي تبدأ التمرير
+
+  // --------------------------------------------------
 
   ngOnInit() {
-    this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
+    this.connectedSupervisorLists = this.areas.map(a => a.name + '-sup');
     this.connectedControllerLists = [
-      'controllers',
       ...this.areas.map(a => a.name + '-ctrl'),
       ...this.areas.flatMap(a =>
         a.shifts.flatMap(s => [
@@ -109,9 +119,82 @@ export class HomeComponent implements OnInit {
         ])
       )
     ];
-
   }
 
+  ngOnDestroy() {
+    this.stopRaf();
+    window.removeEventListener('pointermove', this.pointerMoveHandler);
+  }
+
+  // ====== الدوال الخاصة بتشغيل/إيقاف السكروول السريع أثناء السحب ======
+  onDragStarted() {
+    if (this.isDragging) return;
+    this.isDragging = true;
+    this.lastPointerEvent = null;
+    window.addEventListener('pointermove', this.pointerMoveHandler);
+    this.runRaf();
+  }
+
+  onDragEnded() {
+    this.isDragging = false;
+    this.lastPointerEvent = null;
+    window.removeEventListener('pointermove', this.pointerMoveHandler);
+    this.stopRaf();
+  }
+
+  private runRaf() {
+    if (this.rafId) return;
+    this.ngZone.runOutsideAngular(() => {
+      const loop = () => {
+        if (!this.isDragging || !this.lastPointerEvent) {
+          if (!this.isDragging) this.stopRaf();
+          this.rafId = requestAnimationFrame(loop); // keep loop alive until drag end (safe guard)
+          return;
+        }
+
+        const ev = this.lastPointerEvent;
+        const container = this.areasContainer?.nativeElement;
+        if (!container) {
+          this.rafId = requestAnimationFrame(loop);
+          return;
+        }
+
+        const rect = container.getBoundingClientRect();
+        const topDist = ev.clientY - rect.top;
+        const bottomDist = rect.bottom - ev.clientY;
+
+        let delta = 0;
+        if (topDist >= 0 && topDist < this.scrollZone) {
+          delta = -Math.round(((this.scrollZone - topDist) / this.scrollZone) * this.maxSpeed);
+        } else if (bottomDist >= 0 && bottomDist < this.scrollZone) {
+          delta = Math.round(((this.scrollZone - bottomDist) / this.scrollZone) * this.maxSpeed);
+        }
+
+        if (delta !== 0) {
+          // لو العنصر قابل للسكرول
+          if (container.scrollHeight > container.clientHeight) {
+            container.scrollBy({ top: delta, behavior: 'auto' });
+          } else {
+            // لو ما ينفعش، نتحكم في النافذة
+            window.scrollBy({ top: delta, behavior: 'auto' });
+          }
+        }
+
+        this.rafId = requestAnimationFrame(loop);
+      };
+
+      this.rafId = requestAnimationFrame(loop);
+    });
+  }
+
+  private stopRaf() {
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = 0;
+    }
+  }
+
+  // ================================================================
 
   drop(event: CdkDragDrop<Person[]>) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
@@ -166,28 +249,20 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // حفظ التوزيع في Local Storage
-
+  // بقية الدوال (save/load/reset/export/remove...) — خليتها كما هي عندك:
   saveDistribution() {
     localStorage.setItem('areasDistribution', JSON.stringify(this.areas));
     this.toastr.success('تم حفظ التوزيع بنجاح!', '💾 حفظ');
   }
 
-  // تحميل التوزيع من Local Storage
   loadDistribution() {
     const saved = localStorage.getItem('areasDistribution');
     if (saved) {
       this.areas = JSON.parse(saved);
-
-      // رجع القوائم الأصلية
       this.resetLists();
-
-      // شيل أي مشرف/كنترول متوزع من القوائم الأصلية
       this.removeAssignedFromLists();
-
       this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
       this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
-
       this.toastr.info('تم تحميل التوزيع بنجاح!', '📂 تحميل');
     } else {
       this.toastr.warning('لا يوجد توزيع محفوظ.', '⚠️ تحذير');
@@ -206,27 +281,16 @@ export class HomeComponent implements OnInit {
       cancelButtonText: 'إلغاء'
     }).then((result) => {
       if (result.isConfirmed) {
-        // رجع القوائم الأصلية
         this.resetLists();
-
-        // فضي المناطق
-        this.areas.forEach(area => {
-          area.supervisors = [];
-          area.controllers = [];
-        });
-
+        this.areas.forEach(area => { area.supervisors = []; area.controllers = []; });
         this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
         this.connectedControllerLists = ['controllers', ...this.areas.map(a => a.name + '-ctrl')];
-
         localStorage.removeItem('areasDistribution');
-
         this.toastr.error('تم إعادة التوزيع بالكامل!', '♻️ إعادة');
       }
     });
   }
 
-
-  // دالة تساعدك ترجّع القوائم الأصلية
   resetLists() {
     this.supervisors = [
       { id: 1, name: "حسام حسن", role: "مشرف" },
@@ -260,11 +324,10 @@ export class HomeComponent implements OnInit {
       { id: 26, name: "اندرو عماد", role: "كنترول" },
       { id: 27, name: "مريم يني", role: "كنترول" },
       { id: 28, name: "مريان اميل", role: "كنترول" },
-      { id: 28, name: "رنا خالد", role: "كنترول" }
+      { id: 29, name: "رنا خالد", role: "كنترول" }
     ];
   }
 
-  // دالة تشيل اللي متوزعين من القوائم
   removeAssignedFromLists() {
     const assignedSupervisors = this.areas.flatMap(a => a.supervisors.map(s => s.id));
     const assignedControllers = this.areas.flatMap(a => a.controllers.map(c => c.id));
@@ -275,17 +338,11 @@ export class HomeComponent implements OnInit {
 
   removePerson(person: Person, area: Area, type: 'supervisor' | 'controller') {
     if (type === 'supervisor') {
-      // رجع المشرف للقائمة الأصلية
       this.supervisors.push(person);
-      // امسحه من المنطقة
       area.supervisors = area.supervisors.filter(s => s.id !== person.id);
     } else {
-      // رجع الكنترول للقائمة الأصلية
       this.controllers.push(person);
-      // امسحه من المنطقة
       area.controllers = area.controllers.filter(c => c.id !== person.id);
-
-      // كمان لو الكنترول متوزع في أي شيفت جوه المنطقة → شيله
       area.shifts.forEach(shift => {
         shift.sabahy = shift.sabahy.filter(c => c.id !== person.id);
         shift.between = shift.between.filter(c => c.id !== person.id);
@@ -293,7 +350,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-
+  // ---- exportToWord / غيرها تترك كما هي عندك (لو حبيت أعدلها بعد عرض الملف قول) ----
   exportToWord() {
     const sections = this.areas.flatMap(item => {
       const blocks: (Paragraph | Table)[] = [];
