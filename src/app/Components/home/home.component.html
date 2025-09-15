@@ -24,8 +24,8 @@
 
     <!-- العمود الشمال: المناطق -->
     <div class="col-9">
-        <div class="row">
-            <div class="col-md-6 mb-4" *ngFor="let area of areas" fastScroll>
+        <div class="row" fastScroll>
+            <div class="col-md-6 mb-4" *ngFor="let area of areas">
                 <div class="area-card p-3 h-100 d-flex flex-column" [style.borderColor]="area.color">
                     <h1 class="fw-bold text-center mb-3 text-light">{{ area.name }}</h1>
 
