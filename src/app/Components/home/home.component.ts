@@ -97,8 +97,9 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit() {
-    this.connectedSupervisorLists = this.areas.map(a => a.name + '-sup');
+    this.connectedSupervisorLists = ['supervisors', ...this.areas.map(a => a.name + '-sup')];
     this.connectedControllerLists = [
+      'controllers',
       ...this.areas.map(a => a.name + '-ctrl'),
       ...this.areas.flatMap(a =>
         a.shifts.flatMap(s => [
@@ -107,6 +108,7 @@ export class HomeComponent implements OnInit {
         ])
       )
     ];
+
   }
 
 

@@ -183,3 +183,10 @@
         transform: translateY(0);
     }
 }
+
+.fast-scroll-container {
+    max-height: 85vh;
+    /* حسب الشاشة */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
