@@ -41,15 +41,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     { id: 16, name: "كيرلس صموئيل", role: "كنترول" },
     { id: 17, name: "كيرلس سامح", role: "كنترول" },
     { id: 18, name: "امير مجدي", role: "كنترول" },
-    { id: 19, name: "جوزيف جمال", role: "كنترول" },
-    { id: 20, name: "ابراهيم محمد", role: "كنترول" },
     { id: 21, name: "مدحت وصفي", role: "كنترول" },
-    { id: 22, name: "يوسف ايمن", role: "كنترول" },
     { id: 23, name: "خالد خليفه", role: "كنترول" },
     { id: 24, name: "دعاء احمد", role: "كنترول" },
     { id: 25, name: "جالا جمال", role: "كنترول" },
     { id: 26, name: "اندرو عماد", role: "كنترول" },
-    { id: 27, name: "مريم يني", role: "كنترول" },
+    { id: 27, name: "مادونا عادل", role: "كنترول" },
     { id: 28, name: "مريان اميل", role: "كنترول" },
     { id: 29, name: "رنا خالد", role: "كنترول" }
   ];
