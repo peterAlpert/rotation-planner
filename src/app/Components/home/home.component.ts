@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   controllers: Person[] = [
     { id: 5, name: "بيتر كميل", role: "كنترول" },
     { id: 6, name: "محمد سيد", role: "كنترول" },
-    { id: 7, name: "سيد حسن", role: "كنترول" },
+    // { id: 7, name: "سيد حسن", role: "كنترول" },
     { id: 8, name: "مينا اشرف", role: "كنترول" },
     { id: 9, name: "مينا مخلص", role: "كنترول" },
     { id: 10, name: "محمود بهاء", role: "كنترول" },
@@ -48,7 +48,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     { id: 26, name: "اندرو عماد", role: "كنترول" },
     { id: 27, name: "مادونا عادل", role: "كنترول" },
     { id: 28, name: "مريان اميل", role: "كنترول" },
-    { id: 29, name: "رنا خالد", role: "كنترول" }
+    { id: 29, name: "رنا خالد", role: "كنترول" },
+    { id: 29, name: "يوسف ايمن", role: "كنترول" },
+    { id: 29, name: "الخسيني جمال", role: "كنترول" },
+    { id: 29, name: "كريم محمود", role: "كنترول" },
+    { id: 29, name: "جوفاني عمار", role: "كنترول" },
+    { id: 29, name: "كريم احمد", role: "كنترول" },
+    { id: 29, name: "فادي نصر", role: "كنترول" },
+    { id: 29, name: "امير كمال", role: "كنترول" },
   ];
 
   // ----- المناطق (بما فيها شيفت صباحي مقسوم) -----
